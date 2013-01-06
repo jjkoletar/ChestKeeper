@@ -11,11 +11,9 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -26,9 +24,11 @@ public class ChestKeeper extends JavaPlugin {
     private static final boolean TRACE = true;
     private Map<String, CKUser> users;
     private List<String> fileUsers;
-    private final Set<CKUser> ioQueue = new HashSet<CKUser>();
+    private final Map<String, String> ioQueue = new HashMap<String, String>();
     private CKFacilitator facilitator;
-    private BukkitTask io;
+    private ThreadIO io;
+    private BukkitTask task;
+    private YamlConfiguration serializer;
 
     public static final class Config {
         private static int maxNumberOfChests = 10;
@@ -77,7 +77,9 @@ public class ChestKeeper extends JavaPlugin {
         }
         loadData();
         facilitator = new CKFacilitator(this);
-        io = getServer().getScheduler().runTaskAsynchronously(this, new ThreadIO(ioQueue, new File(getDataFolder(), "data")));
+        serializer = new YamlConfiguration();
+        io = new ThreadIO(ioQueue, new File(getDataFolder(), "data"));
+        task = getServer().getScheduler().runTaskAsynchronously(this, io);
         getCommand("chestkeeper").setExecutor(facilitator);
         getServer().getPluginManager().registerEvents(facilitator, this);
         logger.info("ChestKeeper v" + getDescription().getVersion() + " enabled!");
@@ -89,10 +91,7 @@ public class ChestKeeper extends JavaPlugin {
         for (CKUser user : users.values()) {
             user.forceClean();
         }
-        synchronized (ioQueue) {
-            ioQueue.addAll(users.values());
-            ioQueue.notifyAll();
-        }
+        io.shutdown();
 
         logger.info("ChestKeeper disabled!");
     }
@@ -205,8 +204,9 @@ public class ChestKeeper extends JavaPlugin {
      */
     protected void queueUser(CKUser user) {
         trace("queuing user " + user.getUsername());
-        synchronized (ioQueue) {   //TODO: this shouldn't slow down the main thread as it waits for IO to finish... right?
-            ioQueue.add(user);
+        synchronized (ioQueue) {
+            serializer.set("user", user);
+            ioQueue.put(user.getUsername(), serializer.saveToString());
             ioQueue.notifyAll();
         }
     }

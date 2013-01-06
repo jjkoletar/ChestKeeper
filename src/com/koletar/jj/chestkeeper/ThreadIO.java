@@ -1,50 +1,80 @@
 package com.koletar.jj.chestkeeper;
 
-import org.bukkit.configuration.file.YamlConfiguration;
-
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jjkoletar
  */
 public class ThreadIO implements Runnable {
-    private final Set<CKUser> ioQueue;
+    private final Map<String, String> ioQueue;
     private final File saveFolder;
+    private boolean isRunning;
 
-    public ThreadIO(final Set<CKUser> ioQueue, final File saveFolder) {
+    public ThreadIO(final Map<String, String> ioQueue, final File saveFolder) {
         this.ioQueue = ioQueue;
         this.saveFolder = saveFolder;
     }
 
     public void run() {
-        while (true) {
-            final Set<CKUser> toWrite;
-            synchronized (ioQueue) {
-                while (ioQueue.isEmpty()) {
-                    try {
+        isRunning = true;
+        try {
+            while (isRunning()) {
+                final Map<String, String> toWrite;
+                synchronized (ioQueue) {
+                    while (isRunning && ioQueue.isEmpty()) {
                         ioQueue.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace(); //TODO: i think this is supposed to be handled better
                     }
+                    toWrite = new HashMap<String, String>(ioQueue);
+                    ioQueue.clear();
                 }
-                toWrite = new HashSet<CKUser>(ioQueue);
-                ioQueue.clear();
+                process(toWrite);
             }
-            //TODO: what if a user opens a chest during IO?
-            for (CKUser user : toWrite) {
+        } catch (InterruptedException e) {
+            ChestKeeper.logger.severe("IO Thread was interrupted!");
+            process(ioQueue);
+        } finally {
+            synchronized (ioQueue) {
+                isRunning = false;
+                ioQueue.notifyAll();
+            }
+        }
+    }
+
+    private void process(final Map<String, String> toWrite) {
+        for (Map.Entry<String, String> entry : toWrite.entrySet()) {
+            try {
+                File saveFile = new File(saveFolder, ChestKeeper.getFileName(entry.getKey()));
+                FileWriter fw = new FileWriter(saveFile, false);
+                fw.write(entry.getValue());
+                fw.close();
+                toWrite.remove(entry.getKey());
+                ChestKeeper.trace("saved user " + entry.getKey());
+            } catch (IOException e) {
+                ChestKeeper.logger.severe("Unable to save a user to disk! Username: " + entry.getKey());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean isRunning() {
+        synchronized (ioQueue) {
+            return isRunning;
+        }
+    }
+
+    public void shutdown() {
+        synchronized (ioQueue) {
+            if (isRunning) {
+                isRunning = false;
+                ioQueue.notifyAll(); //wake up processing loop
                 try {
-                    File saveFile = new File(saveFolder, ChestKeeper.getFileName(user.getUsername()));
-                    YamlConfiguration save = new YamlConfiguration();
-                    save.set("user", user);
-                    save.save(saveFile);
-                    toWrite.remove(user);
-                    ChestKeeper.trace("saved user " + user.getUsername());
-                } catch (IOException e) {
-                    ChestKeeper.logger.severe("Unable to save a user to disk! Username: " + user.getUsername());
-                    e.printStackTrace();
+                    ioQueue.wait();
+                } catch (InterruptedException e) {
+                    ChestKeeper.logger.severe("Shutdown process of IO Thread was interrupted!");
                 }
             }
         }
