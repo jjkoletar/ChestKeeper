@@ -18,17 +18,23 @@ public class CKChest implements ConfigurationSerializable {
     private ItemStack[] contents;
     private Inventory inventory;
     private boolean modified;
+    private String title;
 
-    public CKChest(boolean isLargeChest) {
+    public CKChest(String title, boolean isLargeChest) {
         contents = new ItemStack[isLargeChest ? LARGE_CHEST_SIZE : SMALL_CHEST_SIZE];
+        this.title = title;
     }
 
     public CKChest(Map<String, Object> me) {
-        if (me.size() != SMALL_CHEST_SIZE && me.size() != LARGE_CHEST_SIZE) {
+        if (me.size() - 2 != SMALL_CHEST_SIZE && me.size() - 2 != LARGE_CHEST_SIZE) { //Minus two offsets for the == and _title
             throw new IllegalArgumentException("Size of item list is not the size of a large or small chest");
         }
-        contents = new ItemStack[me.size()];
+        contents = new ItemStack[me.size() - 1];
         for (Map.Entry<String, Object> entry : me.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase("_title")) {
+                title = entry.getValue().toString();
+                continue;
+            }
             int i = -1;
             try {
                 i = Integer.valueOf(entry.getKey());
@@ -52,14 +58,16 @@ public class CKChest implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> me = new HashMap<String, Object>();
         for (int i = 0; i < contents.length; i++) {
-            me.put(String.valueOf(i), contents[i]);
+            me.put(String.valueOf(i), contents[i] == null ? new ItemStack(0) : contents[i]);
         }
+        me.put("_title", title);
         return me;
     }
 
-    public Inventory getInventory(String title) {
+    public Inventory getInventory(int magic) {
         if (inventory == null) {
-            inventory = Bukkit.createInventory(null, contents.length, title);
+            inventory = Bukkit.createInventory(null, contents.length, title + makeMagic(magic));
+            ChestKeeper.trace("Title is: " + title + makeMagic(magic));
         }
         if (modified) {
             return inventory;
@@ -70,7 +78,7 @@ public class CKChest implements ConfigurationSerializable {
     }
 
     public boolean save() {
-        if (inventory == null || inventory.getViewers().size() > 0) {
+        if (inventory == null || inventory.getViewers().size() > 1) {
             return false;
         }
         if (!modified) {
@@ -91,5 +99,15 @@ public class CKChest implements ConfigurationSerializable {
                 he.closeInventory();
             }
         }
+    }
+
+    private static String makeMagic(int magic) {
+        StringBuilder sb = new StringBuilder();
+        char[] digits = String.valueOf(magic).toCharArray();
+        for (int i = 0; i < digits.length; i++) {
+            sb.append("\u00A7");
+            sb.append(digits[i]);
+        }
+        return sb.toString();
     }
 }

@@ -15,20 +15,26 @@ public class CKUser implements ConfigurationSerializable {
     private String username;
     private String defaultChest;
     private SortedMap<String, CKChest> chests;
-    private HashMap<Inventory, CKChest> inventoryPairings;
+    private HashMap<String, CKChest> inventoryPairings;
+    private int magic;
 
     public CKUser(String username) {
         this.username = username;
+        chests = new TreeMap<String, CKChest>();
+        inventoryPairings = new HashMap<String, CKChest>();
+        magic = username.hashCode();
     }
 
     public CKUser(Map<String, Object> me) {
         chests = new TreeMap<String, CKChest>();
-        inventoryPairings = new HashMap<Inventory, CKChest>();
+        inventoryPairings = new HashMap<String, CKChest>();
         for (Map.Entry<String, Object> entry : me.entrySet()) {
             if (entry.getKey().equals("defaultChest")) {
                 defaultChest = entry.getValue() == null ? "" : entry.getValue().toString();
             } else if (entry.getKey().equals("username")) {
                 username = entry.getValue().toString();
+            } else if (entry.getKey().equals("magic")) {
+                magic = Integer.valueOf(entry.getValue().toString());
             } else if (entry.getValue() instanceof CKChest) {
                 chests.put(entry.getKey(), (CKChest) entry.getValue());
             }
@@ -39,6 +45,7 @@ public class CKUser implements ConfigurationSerializable {
         Map<String, Object> me = new HashMap<String, Object>();
         me.put("defaultChest", defaultChest);
         me.put("username", username);
+        me.put("magic", magic);
         for (Map.Entry<String, CKChest> entry : chests.entrySet()) {
             me.put(entry.getKey(), entry.getValue());
         }
@@ -58,32 +65,38 @@ public class CKUser implements ConfigurationSerializable {
     }
 
     public boolean createChest(String name, boolean isLargeChest) {
-        if (name.equalsIgnoreCase("defaultChest") || name.equalsIgnoreCase("username") || chests.containsKey(name.toLowerCase())) {
+        if (name.equalsIgnoreCase("defaultChest") || name.equalsIgnoreCase("username") || name.equalsIgnoreCase("magic") || chests.containsKey(name.toLowerCase())) {
             return false;
         }
-        chests.put(name.toLowerCase(), new CKChest(isLargeChest));
+        chests.put(name.toLowerCase(), new CKChest(name, isLargeChest));
         return true;
     }
 
-    public Inventory getChest() {                                //TODO: remember to validate renaming the default chest
+    public CKChest getChest() {
         String key = (defaultChest == null || defaultChest.equals("")) && chests.size() > 0 ? chests.firstKey() : defaultChest;
-        return getChest(key);
+        return chests.get(key);
     }
 
-    public Inventory getChest(String name) {
+    public Inventory openChest() {                                //TODO: remember to validate renaming the default chest
+        String key = (defaultChest == null || defaultChest.equals("")) && chests.size() > 0 ? chests.firstKey() : defaultChest;
+        ChestKeeper.trace(key);
+        return openChest(key);
+    }
+
+    public Inventory openChest(String name) {
         String lowerName = name.toLowerCase();
         CKChest chest = chests.get(lowerName);
         if (chest == null) {
             return null;
         }
-        Inventory inventory = chest.getInventory(lowerName);
-        inventoryPairings.put(inventory, chest);
+        Inventory inventory = chest.getInventory(magic);
+        inventoryPairings.put(inventory.getTitle(), chest);
         return inventory;
     }
 
     public boolean save(Inventory inventory) {
-        if (inventoryPairings.containsKey(inventory)) {
-            return inventoryPairings.get(inventory).save();
+        if (inventoryPairings.containsKey(inventory.getTitle())) {
+            return inventoryPairings.get(inventory.getTitle()).save();
         }
         return false;
     }

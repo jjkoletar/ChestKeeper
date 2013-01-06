@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class ChestKeeper extends JavaPlugin {
     public static Logger logger;
-    private static final boolean TRACE = false;
+    private static final boolean TRACE = true;
     private Map<String, CKUser> users;
     private List<String> fileUsers;
     private final Set<CKUser> ioQueue = new HashSet<CKUser>();
@@ -51,7 +51,7 @@ public class ChestKeeper extends JavaPlugin {
 
     private static final class DataFilter implements FilenameFilter {
         public boolean accept(File file, String s) {
-            return file.getName().endsWith(".yml");
+            return s.endsWith(".yml");
         }
     }
 
@@ -85,10 +85,15 @@ public class ChestKeeper extends JavaPlugin {
 
     public void onDisable() {
         logger.info("ChestKeeper disabling...");
+
         for (CKUser user : users.values()) {
             user.forceClean();
-            ioQueue.add(user);
         }
+        synchronized (ioQueue) {
+            ioQueue.addAll(users.values());
+            ioQueue.notifyAll();
+        }
+
         logger.info("ChestKeeper disabled!");
     }
 
@@ -127,12 +132,14 @@ public class ChestKeeper extends JavaPlugin {
             dataFolder.mkdir();
         }
         for (File file : dataFolder.listFiles(new DataFilter())) {
+            trace(file.getName());
             fileUsers.add(file.getName().replace(".yml", ""));
         }
     }
 
     private void loadUser(String username) {
         if (!users.containsKey(username) && fileUsers.contains(username)) {
+            trace("loading " + username);
             File userFile = new File(new File(getDataFolder(), "data"), getFileName(username));
             YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
             if (userConfig.contains("user")) {
@@ -197,6 +204,7 @@ public class ChestKeeper extends JavaPlugin {
      * @param user CKUser to save
      */
     protected void queueUser(CKUser user) {
+        trace("queuing user " + user.getUsername());
         synchronized (ioQueue) {   //TODO: this shouldn't slow down the main thread as it waits for IO to finish... right?
             ioQueue.add(user);
             ioQueue.notifyAll();

@@ -31,14 +31,17 @@ public class ThreadIO implements Runnable {
                     }
                 }
                 toWrite = new HashSet<CKUser>(ioQueue);
+                ioQueue.clear();
             }
             //TODO: what if a user opens a chest during IO?
             for (CKUser user : toWrite) {
                 try {
                     File saveFile = new File(saveFolder, ChestKeeper.getFileName(user.getUsername()));
-                    YamlConfiguration save = YamlConfiguration.loadConfiguration(saveFile);
+                    YamlConfiguration save = new YamlConfiguration();
                     save.set("user", user);
                     save.save(saveFile);
+                    toWrite.remove(user);
+                    ChestKeeper.trace("saved user " + user.getUsername());
                 } catch (IOException e) {
                     ChestKeeper.logger.severe("Unable to save a user to disk! Username: " + user.getUsername());
                     e.printStackTrace();
