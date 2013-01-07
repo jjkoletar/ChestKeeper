@@ -145,11 +145,13 @@ public class ChestKeeper extends JavaPlugin {
         serializer = new YamlConfiguration();
         io = new ThreadIO(ioQueue, new File(getDataFolder(), "data"));
         getServer().getScheduler().runTaskAsynchronously(this, io);
-        getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
-            public void run() {
-                checkUpdates();
-            }
-        });
+        if (!getDescription().getVersion().contains("dev")) {
+            getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
+                public void run() {
+                    checkUpdates();
+                }
+            });
+        }
         getCommand("chestkeeper").setExecutor(facilitator);
         getServer().getPluginManager().registerEvents(facilitator, this);
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
