@@ -119,7 +119,11 @@ public class CKChest implements ConfigurationSerializable {
         char[] digits = String.valueOf(magic).toCharArray();
         for (int i = 0; i < digits.length; i++) {
             sb.append("\u00A7");
-            sb.append(digits[i]);
+            if (digits[i] == '-') {
+                sb.append('f');
+            } else {
+                sb.append(digits[i]);
+            }
         }
         return sb.toString();
     }
