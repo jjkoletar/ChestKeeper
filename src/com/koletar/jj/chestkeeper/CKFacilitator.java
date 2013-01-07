@@ -4,7 +4,6 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -382,7 +381,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
             return;
         }
         if (ChestKeeper.Config.getLargeChestPrice() > 0) {
-            double price =  ChestKeeper.Config.getLargeChestPrice() - ChestKeeper.Config.getNormalChestPrice();
+            double price = ChestKeeper.Config.getLargeChestPrice() - ChestKeeper.Config.getNormalChestPrice();
             if (price < 0) {
                 price = 0;
             }
@@ -618,7 +617,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (checkBlock(event.getBlock())) {
-           event.setCancelled(!event.getPlayer().hasPermission("chestkeeper.sign.break"));
+            event.setCancelled(!event.getPlayer().hasPermission("chestkeeper.sign.break"));
         }
     }
 

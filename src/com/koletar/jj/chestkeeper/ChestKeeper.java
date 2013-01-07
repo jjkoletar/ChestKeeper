@@ -223,8 +223,6 @@ public class ChestKeeper extends JavaPlugin {
         }
     }
 
-    protected boolean hasEconomy() {
-        return economy != null;
     }
 
     protected Economy getEconomy() {
@@ -250,6 +248,7 @@ public class ChestKeeper extends JavaPlugin {
 
     /**
      * Get a user by a full username, and create them if they don't exist.
+     *
      * @param username Username to get
      * @return CKUser of the username
      */
@@ -268,6 +267,7 @@ public class ChestKeeper extends JavaPlugin {
 
     /**
      * Get a user from a player object, and create them if they don't exist.
+     *
      * @param p Bukkit player
      * @return CKUser
      */
@@ -277,6 +277,7 @@ public class ChestKeeper extends JavaPlugin {
 
     /**
      * Attempt to match a user by either a full or partial username.
+     *
      * @param username Username to match
      * @return null if no user was found, else the CKUser
      */
@@ -304,6 +305,7 @@ public class ChestKeeper extends JavaPlugin {
 
     /**
      * Add a modified CKUser to the io queue
+     *
      * @param user CKUser to save
      */
     protected void queueUser(CKUser user) {
