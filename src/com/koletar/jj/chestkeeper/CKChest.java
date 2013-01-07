@@ -29,17 +29,19 @@ public class CKChest implements ConfigurationSerializable {
         if (me.size() - 2 != SMALL_CHEST_SIZE && me.size() - 2 != LARGE_CHEST_SIZE) { //Minus two offsets for the == and _title
             throw new IllegalArgumentException("Size of item list is not the size of a large or small chest");
         }
-        contents = new ItemStack[me.size() - 1];
+        contents = new ItemStack[me.size() - 2];
         for (Map.Entry<String, Object> entry : me.entrySet()) {
             if (entry.getKey().equalsIgnoreCase("_title")) {
                 title = entry.getValue().toString();
+                continue;
+            } else if (entry.getKey().equalsIgnoreCase("==")) {
                 continue;
             }
             int i = -1;
             try {
                 i = Integer.valueOf(entry.getKey());
             } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("A key wasn't an integer");
+                throw new IllegalArgumentException("A key wasn't an integer, " + entry.getKey());
             }
             ItemStack is;
             try {
@@ -58,7 +60,7 @@ public class CKChest implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> me = new HashMap<String, Object>();
         for (int i = 0; i < contents.length; i++) {
-            me.put(String.valueOf(i), contents[i] == null ? new ItemStack(0) : contents[i]);
+            me.put(String.valueOf(i), contents[i]);
         }
         me.put("_title", title);
         return me;
@@ -101,6 +103,17 @@ public class CKChest implements ConfigurationSerializable {
         }
     }
 
+    public void empty() {
+        if (inventory != null) {
+            if (modified) {
+                inventory.clear();
+            } else {
+                contents = new ItemStack[contents.length];
+                modified = true;
+            }
+        }
+    }
+
     private static String makeMagic(int magic) {
         StringBuilder sb = new StringBuilder();
         char[] digits = String.valueOf(magic).toCharArray();
@@ -109,5 +122,37 @@ public class CKChest implements ConfigurationSerializable {
             sb.append(digits[i]);
         }
         return sb.toString();
+    }
+
+    public void setName(String name) {
+        this.title = name;
+    }
+
+    public boolean isLargeChest() {
+        return contents.length == LARGE_CHEST_SIZE;
+    }
+
+    public boolean upgrade() {
+        if (contents.length == LARGE_CHEST_SIZE) {
+            return false;
+        }
+        kick();
+        save();
+        ItemStack[] newContents = new ItemStack[LARGE_CHEST_SIZE];
+        System.arraycopy(contents, 0, newContents, 0, contents.length);
+        contents = newContents;
+        inventory = null;
+        return true;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    protected void setItems(ItemStack[] in) {
+        contents = new ItemStack[contents.length];
+        for (int i = 0; i < in.length && i < contents.length; i++) {
+            contents[i] = in[i];
+        }
     }
 }

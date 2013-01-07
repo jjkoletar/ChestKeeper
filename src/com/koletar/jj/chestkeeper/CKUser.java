@@ -1,10 +1,17 @@
 package com.koletar.jj.chestkeeper;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -60,10 +67,6 @@ public class CKUser implements ConfigurationSerializable {
         return username.hashCode() + 1;
     }
 
-    public boolean createChest(boolean isLargeChest) {
-        return createChest(isLargeChest ? "large" + (chests.size() + 1) : "normal" + (chests.size() + 1), isLargeChest);
-    }
-
     public boolean createChest(String name, boolean isLargeChest) {
         if (name.equalsIgnoreCase("defaultChest") || name.equalsIgnoreCase("username") || name.equalsIgnoreCase("magic") || chests.containsKey(name.toLowerCase())) {
             return false;
@@ -77,9 +80,12 @@ public class CKUser implements ConfigurationSerializable {
         return chests.get(key);
     }
 
-    public Inventory openChest() {                                //TODO: remember to validate renaming the default chest
+    public CKChest getChest(String name) {
+        return chests.get(name.toLowerCase());
+    }
+
+    public Inventory openChest() {
         String key = (defaultChest == null || defaultChest.equals("")) && chests.size() > 0 ? chests.firstKey() : defaultChest;
-        ChestKeeper.trace(key);
         return openChest(key);
     }
 
@@ -101,16 +107,6 @@ public class CKUser implements ConfigurationSerializable {
         return false;
     }
 
-    public boolean isModified() {
-        boolean combo = true;
-        for (CKChest chest : inventoryPairings.values()) {
-            if (chest.isModified()) {
-                combo = false;
-            }
-        }
-        return combo;
-    }
-
     public void forceClean() {
         for (CKChest chest : inventoryPairings.values()) {
             chest.kick();
@@ -120,5 +116,99 @@ public class CKUser implements ConfigurationSerializable {
 
     public String getUsername() {
         return username;
+    }
+
+    public int getNumberOfChests() {
+        return chests.size();
+    }
+
+    public Set<String> getChestNames() {
+        return chests.keySet();
+    }
+
+    public boolean removeChest(String name) {
+        if (chests.containsKey(name.toLowerCase())) {
+            chests.remove(name.toLowerCase());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setDefaultChest(String name) {
+        if (chests.containsKey(name.toLowerCase())) {
+            defaultChest = name.toLowerCase();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasChest(String name) {
+        return chests.containsKey(name.toLowerCase());
+    }
+
+    public void mv(String from, String to) {
+        CKChest chest = chests.get(from.toLowerCase());
+        chest.setName(to);
+        chests.remove(from.toLowerCase());
+        chests.put(to.toLowerCase(), chest);
+        if (defaultChest.equalsIgnoreCase(from)) {
+            defaultChest = to.toLowerCase();
+        }
+    }
+
+    public void fromVC(BufferedReader chestYml, String defaultChest) {
+        String currentChest = null;
+        boolean isLargeChest = false;
+        boolean areReadingItems = false;
+        ItemStack currentItem = null;
+        List<ItemStack> items = new LinkedList<ItemStack>();
+        try {
+            boolean done = false;
+            while (!done) {
+                String line = chestYml.readLine();
+                if (line != null) {
+                    if (line.equals("")) {
+                        //Skip
+                    } else if (!line.substring(0, 1).equals(" ")) {
+                        if (currentChest != null) {
+                            CKChest chest = new CKChest(currentChest, isLargeChest);
+                            if (currentItem != null) {
+                                items.add(currentItem);
+                            }
+                            chest.setItems(items.toArray(new ItemStack[items.size()]));
+                            chests.put(currentChest.toLowerCase(), chest);
+                        }
+                        currentChest = line.substring(0, line.length() - 1);
+                    } else if (line.startsWith("  type: ")) {
+                        isLargeChest = line.contains("large");
+                    } else if (line.startsWith("  eitems:")) {
+                        areReadingItems = true;
+                    } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
+                        if (currentItem != null) {
+                            items.add(currentItem);
+                        }
+                        currentItem = new ItemStack(1);
+                    } else if (areReadingItems && line.startsWith("    count: ")) {
+                        int i = Integer.valueOf(line.substring(11));
+                        currentItem.setAmount(i);
+                    } else if (areReadingItems && line.startsWith("    damage: ")) {
+                        short s = Short.valueOf(line.substring(12));
+                        currentItem.setDurability(s);
+                    } else if (areReadingItems && line.startsWith("    id: ")) {
+                        int id = Integer.valueOf(line.substring(8));
+                        currentItem.setTypeId(id);
+                    } else if (areReadingItems && line.startsWith("      ")) {
+                        String ench = line.substring(6);
+                        String[] bits = ench.split(": ");
+                        currentItem.addUnsafeEnchantment(Enchantment.getById(Integer.valueOf(bits[0])), Integer.valueOf(bits[1]));
+                    }
+                } else {
+                    done = true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        setDefaultChest(defaultChest);
     }
 }
