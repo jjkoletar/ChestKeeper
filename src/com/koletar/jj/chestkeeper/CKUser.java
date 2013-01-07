@@ -178,6 +178,7 @@ public class CKUser implements ConfigurationSerializable {
                             }
                             chest.setItems(items.toArray(new ItemStack[items.size()]));
                             chests.put(currentChest.toLowerCase(), chest);
+                            items.clear();
                         }
                         currentChest = line.substring(0, line.length() - 1);
                     } else if (line.startsWith("  type: ")) {

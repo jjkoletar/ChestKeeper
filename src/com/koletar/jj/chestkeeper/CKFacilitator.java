@@ -354,7 +354,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
-                            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            e.printStackTrace();
                         }
                         plugin.queueUser(user);
                     }
