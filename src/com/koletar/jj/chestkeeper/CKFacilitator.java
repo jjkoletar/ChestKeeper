@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.io.BufferedReader;
@@ -363,6 +364,10 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     sender.sendMessage(phrase("converted"));
                     return true;
                 }
+            } else if (args[0].equalsIgnoreCase("about")) {
+                sender.sendMessage(phrase("about1"));
+                sender.sendMessage(phrase("about2"));
+                sender.sendMessage(phrase("about3", plugin.getDescription().getVersion()));
             }
         }
         return false;
@@ -630,5 +635,23 @@ public class CKFacilitator implements CommandExecutor, Listener {
             }
         }
         return false;
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (event.getPlayer().hasPermission("chestkeeper.updates") && plugin.needsUpdate()) {
+            final Player player = event.getPlayer();
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                public void run() {
+                    player.sendMessage(phrase("updateWarning1"));
+                    player.sendMessage(phrase("updateWarning2"));
+                    if (plugin.isUpdateCritical()) {
+                        player.sendMessage(phrase("criticalUpdateWarningDecoration"));
+                        player.sendMessage(phrase("criticalUpdateWarning"));
+                        player.sendMessage(phrase("criticalUpdateWarningDecoration"));
+                    }
+                }
+            });
+        }
     }
 }

@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +33,8 @@ public class ChestKeeper extends JavaPlugin {
     private ThreadIO io;
     private YamlConfiguration serializer;
     private Economy economy;
+    private boolean needsUpdate = false;
+    private boolean updateIsCritical = false;
 
     public static final class Config {
         private static int maxNumberOfChests = 10;
@@ -140,6 +143,11 @@ public class ChestKeeper extends JavaPlugin {
         serializer = new YamlConfiguration();
         io = new ThreadIO(ioQueue, new File(getDataFolder(), "data"));
         getServer().getScheduler().runTaskAsynchronously(this, io);
+        getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
+            public void run() {
+                checkUpdates();
+            }
+        });
         getCommand("chestkeeper").setExecutor(facilitator);
         getServer().getPluginManager().registerEvents(facilitator, this);
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
@@ -163,6 +171,22 @@ public class ChestKeeper extends JavaPlugin {
         io.shutdown();
 
         logger.info("ChestKeeper disabled!");
+    }
+
+    private void checkUpdates() {
+        try {
+            URL updateFile = new URL("http://dl.dropbox.com/u/16290839/ChestKeeper/update.yml");
+            YamlConfiguration updates = YamlConfiguration.loadConfiguration(updateFile.openStream());
+            int remoteVer = updates.getInt("version");
+            boolean isCritical = updates.getConfigurationSection(String.valueOf(remoteVer)).getBoolean("critical");
+            int localVer = Integer.valueOf(getDescription().getVersion().replace(".", ""));
+            if (remoteVer > localVer) {
+                needsUpdate = true;
+                updateIsCritical = isCritical;
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     public static void trace(String message) {
@@ -223,6 +247,12 @@ public class ChestKeeper extends JavaPlugin {
         }
     }
 
+    public boolean needsUpdate() {
+        return needsUpdate;
+    }
+
+    public boolean isUpdateCritical() {
+        return updateIsCritical;
     }
 
     protected Economy getEconomy() {
