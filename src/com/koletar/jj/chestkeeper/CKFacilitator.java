@@ -343,6 +343,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         }
                     }
                     File chests = new File(vcDir, "Chests");
+                    YamlConfiguration conf = new YamlConfiguration();
                     for (File chestFile : chests.listFiles(new ChestKeeper.ChestYMLFilter())) {
                         String username = chestFile.getName().replace(".chestYml", "");
                         CKUser user = plugin.getUser(username);
@@ -351,12 +352,14 @@ public class CKFacilitator implements CommandExecutor, Listener {
                             BufferedReader br = new BufferedReader(fr);
                             user.fromVC(br, defaultChests.get(username));
                             br.close();
+                            File out = new File(new File(plugin.getDataFolder(), "data"), ChestKeeper.getFileName(user.getUsername()));
+                            conf.set("user", user);
+                            conf.save(out);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        plugin.queueUser(user);
                     }
                     sender.sendMessage(phrase("converted"));
                     return true;
