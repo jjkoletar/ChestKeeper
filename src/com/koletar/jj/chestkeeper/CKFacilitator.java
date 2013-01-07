@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -346,9 +347,14 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         String username = chestFile.getName().replace(".chestYml", "");
                         CKUser user = plugin.getUser(username);
                         try {
-                            user.fromVC(new BufferedReader(new FileReader(chestFile)), defaultChests.get(username));
+                            FileReader fr = new FileReader(chestFile);
+                            BufferedReader br = new BufferedReader(fr);
+                            user.fromVC(br, defaultChests.get(username));
+                            br.close();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                         }
                         plugin.queueUser(user);
                     }
