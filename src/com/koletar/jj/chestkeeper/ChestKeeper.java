@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class ChestKeeper extends JavaPlugin {
     public static Logger logger;
-    private static final boolean TRACE = true;
+    private static final boolean TRACE = false;
     private Map<String, CKUser> users;
     private List<String> fileUsers;
     private final Map<String, String> ioQueue = new HashMap<String, String>();

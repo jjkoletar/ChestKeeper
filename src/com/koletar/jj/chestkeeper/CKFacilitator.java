@@ -350,6 +350,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
+                        plugin.queueUser(user);
                     }
                     sender.sendMessage(phrase("converted"));
                     return true;

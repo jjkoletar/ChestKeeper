@@ -135,6 +135,7 @@ public class CKUser implements ConfigurationSerializable {
     }
 
     public boolean setDefaultChest(String name) {
+        if (name == null) return true;
         if (chests.containsKey(name.toLowerCase())) {
             defaultChest = name.toLowerCase();
             return true;
