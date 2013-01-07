@@ -6,6 +6,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.Metrics;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,6 +36,7 @@ public class ChestKeeper extends JavaPlugin {
     private Economy economy;
     private boolean needsUpdate = false;
     private boolean updateIsCritical = false;
+    private Metrics metrics;
 
     public static final class Config {
         private static int maxNumberOfChests = 10;
@@ -158,6 +160,14 @@ public class ChestKeeper extends JavaPlugin {
             Config.setChestOpenPrice(0);
             Config.setNormalChestPrice(0);
             Config.setLargeChestPrice(0);
+        }
+        //Metrics
+        try {
+            metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            logger.warning("ChestKeeper couldn't initialize metrics!");
+            e.printStackTrace();
         }
         logger.info("ChestKeeper v" + getDescription().getVersion() + " enabled!");
     }
