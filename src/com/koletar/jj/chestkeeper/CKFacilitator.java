@@ -592,16 +592,19 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     if (lines[0].equals(phrase("keeperSignReader"))) {
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
+                            return;
                         }
                         openDefaultChest(p);
                     } else if (lines[0].equals(phrase("upgradeSignReader"))) {
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
+                            return;
                         }
                         upgradeChest(p, null, plugin.getUser(p));
                     } else if (lines[0].equals(phrase("buySignReader"))) {
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
+                            return;
                         }
                         CKUser user = plugin.getUser(p);
                         if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !p.hasPermission("chestkeeper.override")) {
