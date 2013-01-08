@@ -187,6 +187,8 @@ public class CKUser implements ConfigurationSerializable {
                         }
                     } else if (line.startsWith("  type: ")) {
                         isLargeChest = line.contains("large");
+                    } else if (line.equals("  eitems: []")) {
+                        //Skip
                     } else if (line.startsWith("  eitems:")) {
                         areReadingItems = true;
                     } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
@@ -210,6 +212,15 @@ public class CKUser implements ConfigurationSerializable {
                     }
                 } else {
                     done = true;
+                    if (currentChest != null) {
+                        CKChest chest = new CKChest(currentChest, isLargeChest);
+                        if (currentItem != null) {
+                            items.add(currentItem);
+                        }
+                        chest.setItems(items.toArray(new ItemStack[items.size()]));
+                        chests.put(currentChest.toLowerCase(), chest);
+                        items.clear();
+                    }
                 }
             }
         } catch (IOException e) {
