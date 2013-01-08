@@ -130,6 +130,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     }
                     Player p = (Player) sender;
                     CKUser user = plugin.getUser(p);
+                    trace("current chests: " + user.getNumberOfChests() + ", conf max: " + ChestKeeper.Config.getMaxNumberOfChests() + ", has perm: " + sender.hasPermission("chestkeeper.override"));
                     if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !sender.hasPermission("chestkeeper.override")) {
                         p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
                         return true;
