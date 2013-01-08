@@ -125,6 +125,10 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         return true;
                     }
                 } else if (args[0].equalsIgnoreCase("b") || args[0].equalsIgnoreCase("buy")) {
+                    if (!sender.hasPermission("chestkeeper.use")) {
+                        sender.sendMessage(phrase("noPermission"));
+                        return true;
+                    }
                     if (!validatePlayer(sender)) {
                         return true;
                     }
