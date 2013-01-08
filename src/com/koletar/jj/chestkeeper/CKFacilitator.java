@@ -461,6 +461,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
         Inventory chest = user.openChest(chestName);
         if (chest == null) {
             p.sendMessage(phrase("unknownChest", chestName));
+            return;
         }
         sendChest(p, user, chest);
     }
