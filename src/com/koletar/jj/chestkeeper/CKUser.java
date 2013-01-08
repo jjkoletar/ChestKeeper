@@ -188,7 +188,11 @@ public class CKUser implements ConfigurationSerializable {
                     } else if (line.startsWith("  type: ")) {
                         isLargeChest = line.contains("large");
                     } else if (line.equals("  eitems: []")) {
-                        //Skip
+                        if (currentChest != null) {
+                            CKChest chest = new CKChest(currentChest, isLargeChest);
+                            chests.put(currentChest.toLowerCase(), chest);
+                            currentChest = null;
+                        }
                     } else if (line.startsWith("  eitems:")) {
                         areReadingItems = true;
                     } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
