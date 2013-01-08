@@ -180,7 +180,11 @@ public class CKUser implements ConfigurationSerializable {
                             chests.put(currentChest.toLowerCase(), chest);
                             items.clear();
                         }
-                        currentChest = line.substring(0, line.length() - 1).replace("'", "");
+                        if (line.startsWith("'") && line.endsWith("':")) {
+                            currentChest = line.substring(1, line.length() - 2);
+                        } else {
+                            currentChest = line.substring(0, line.length() - 1);
+                        }
                     } else if (line.startsWith("  type: ")) {
                         isLargeChest = line.contains("large");
                     } else if (line.startsWith("  eitems:")) {
