@@ -130,7 +130,6 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     }
                     Player p = (Player) sender;
                     CKUser user = plugin.getUser(p);
-                    trace("current chests: " + user.getNumberOfChests() + ", conf max: " + ChestKeeper.Config.getMaxNumberOfChests() + ", has perm: " + sender.hasPermission("chestkeeper.override"));
                     if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !sender.hasPermission("chestkeeper.override")) {
                         p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
                         return true;
@@ -603,6 +602,11 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     } else if (lines[0].equals(phrase("buySignReader"))) {
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
+                        }
+                        CKUser user = plugin.getUser(p);
+                        if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !p.hasPermission("chestkeeper.override")) {
+                            p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
+                            return;
                         }
                         if (ChestKeeper.Config.getNormalChestPrice() > 0) {
                             EconomyResponse er = plugin.getEconomy().withdrawPlayer(p.getName(), ChestKeeper.Config.getNormalChestPrice());
