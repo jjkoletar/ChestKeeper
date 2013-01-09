@@ -30,6 +30,7 @@ public class CKUser implements ConfigurationSerializable {
         chests = new TreeMap<String, CKChest>();
         inventoryPairings = new HashMap<String, CKChest>();
         magic = username.hashCode();
+        defaultChest = "";
     }
 
     public CKUser(Map<String, Object> me) {
