@@ -68,7 +68,14 @@ public class CKChest implements ConfigurationSerializable {
 
     public Inventory getInventory(int magic) {
         if (inventory == null) {
-            inventory = Bukkit.createInventory(null, contents.length, title + makeMagic(magic));
+            String invTitle = title + makeMagic(magic);
+            if (invTitle.length() > 32) {
+                invTitle = invTitle.substring(0, 32);
+                if (invTitle.endsWith("\u00A7")) {
+                    invTitle = invTitle.substring(0, invTitle.length() - 1);
+                }
+            }
+            inventory = Bukkit.createInventory(null, contents.length, invTitle);
             ChestKeeper.trace("Title is: " + title + makeMagic(magic));
         }
         if (modified) {
@@ -130,6 +137,9 @@ public class CKChest implements ConfigurationSerializable {
 
     public void setName(String name) {
         this.title = name;
+        kick();
+        save();
+        inventory = null;
     }
 
     public boolean isLargeChest() {
