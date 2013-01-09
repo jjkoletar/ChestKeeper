@@ -303,7 +303,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         p.sendMessage(phrase("unknownChest", args[1]));
                         return true;
                     }
-                    if (user.hasChest(args[2])) {
+                    if (user.hasChest(args[2]) || args[2].equalsIgnoreCase("defaultChest") || args[2].equalsIgnoreCase("username") || args[2].equalsIgnoreCase("magic")) {
                         p.sendMessage(phrase("nameInUse", args[2]));
                         return true;
                     }
@@ -367,11 +367,11 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     }
                     sender.sendMessage(phrase("converted"));
                     return true;
+                } else if (args[0].equalsIgnoreCase("about") || args[0].equalsIgnoreCase("version")) {
+                    sender.sendMessage(phrase("about1"));
+                    sender.sendMessage(phrase("about2"));
+                    sender.sendMessage(phrase("about3", plugin.getDescription().getVersion()));
                 }
-            } else if (args[0].equalsIgnoreCase("about")) {
-                sender.sendMessage(phrase("about1"));
-                sender.sendMessage(phrase("about2"));
-                sender.sendMessage(phrase("about3", plugin.getDescription().getVersion()));
             }
         }
         return false;
