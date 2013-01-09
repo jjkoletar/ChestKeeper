@@ -175,6 +175,7 @@ public class CKUser implements ConfigurationSerializable {
                             CKChest chest = new CKChest(currentChest, isLargeChest);
                             if (currentItem != null) {
                                 items.add(currentItem);
+                                currentItem = null;
                             }
                             chest.setItems(items.toArray(new ItemStack[items.size()]));
                             chests.put(currentChest.toLowerCase(), chest);
@@ -188,11 +189,7 @@ public class CKUser implements ConfigurationSerializable {
                     } else if (line.startsWith("  type: ")) {
                         isLargeChest = line.contains("large");
                     } else if (line.equals("  eitems: []")) {
-                        if (currentChest != null) {
-                            CKChest chest = new CKChest(currentChest, isLargeChest);
-                            chests.put(currentChest.toLowerCase(), chest);
-                            currentChest = null;
-                        }
+                        //Skip
                     } else if (line.startsWith("  eitems:")) {
                         areReadingItems = true;
                     } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
