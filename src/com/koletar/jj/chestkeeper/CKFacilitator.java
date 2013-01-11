@@ -48,7 +48,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("chestkeeper")) {
-            if (args.length == 0) {
+            if (args.length == 0 || (args.length >= 1 && (args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("?")))) {
                 for (int i = 1; i <= 18; i++) {
                     sender.sendMessage(phrase("help" + i));
                 }
@@ -94,6 +94,8 @@ public class CKFacilitator implements CommandExecutor, Listener {
                             return true;
                         }
                     }
+                    sender.sendMessage(phrase("badArgs"));
+                    return true;
                 } else if (args[0].equalsIgnoreCase("l") || args[0].equalsIgnoreCase("list")) {
                     if (!sender.hasPermission("chestkeeper.use")) {
                         sender.sendMessage(phrase("noPermission"));
@@ -173,6 +175,8 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         }
                         return true;
                     }
+                    sender.sendMessage(phrase("badArgs"));
+                    return true;
                 } else if (args[0].equalsIgnoreCase("empty") || args[0].equalsIgnoreCase("e")) {
                     if (!sender.hasPermission("chestkeeper.use")) {
                         sender.sendMessage(phrase("noPermission"));
@@ -371,8 +375,11 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     sender.sendMessage(phrase("about1"));
                     sender.sendMessage(phrase("about2"));
                     sender.sendMessage(phrase("about3", plugin.getDescription().getVersion()));
+                    return true;
                 }
             }
+            sender.sendMessage(phrase("unknownCommand"));
+            return true;
         }
         return false;
     }
