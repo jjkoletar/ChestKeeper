@@ -271,6 +271,10 @@ public class ChestKeeper extends JavaPlugin {
         return economy;
     }
 
+    protected boolean hasEconomy() {
+        return economy != null;
+    }
+
     private void loadUser(String username) {
         if (!users.containsKey(username) && fileUsers.contains(username)) {
             trace("loading " + username);

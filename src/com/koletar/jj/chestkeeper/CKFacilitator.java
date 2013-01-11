@@ -389,7 +389,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
             p.sendMessage(phrase("alreadyLarge", chest));
             return;
         }
-        if (ChestKeeper.Config.getLargeChestPrice() > 0) {
+        if (ChestKeeper.Config.getLargeChestPrice() > 0 && plugin.hasEconomy()) {
             double price = ChestKeeper.Config.getLargeChestPrice() - ChestKeeper.Config.getNormalChestPrice();
             if (price < 0) {
                 price = 0;
@@ -497,7 +497,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
             name = phrase(isLargeChest ? "large" : "normal") + (plugin.getUser(p).getNumberOfChests() + 1);
         }
         user.createChest(name, isLargeChest);
-        p.sendMessage(phrase(price == 0 ? "youBoughtAChest" : "youBoughtAChestFor", phrase(isLargeChest ? "large" : "normal"), name, plugin.getEconomy().format(price)));
+        p.sendMessage(phrase(price == 0 ? "youBoughtAChest" : "youBoughtAChestFor", phrase(isLargeChest ? "large" : "normal"), name, plugin.hasEconomy() ? plugin.getEconomy().format(price) : "0"));
         plugin.queueUser(user);
     }
 
@@ -615,7 +615,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                             p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
                             return;
                         }
-                        if (ChestKeeper.Config.getNormalChestPrice() > 0) {
+                        if (ChestKeeper.Config.getNormalChestPrice() > 0 && plugin.hasEconomy()) {
                             EconomyResponse er = plugin.getEconomy().withdrawPlayer(p.getName(), ChestKeeper.Config.getNormalChestPrice());
                             if (!er.transactionSuccess()) {
                                 p.sendMessage(phrase("youreTooPoor"));
