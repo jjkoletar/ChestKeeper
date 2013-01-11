@@ -179,6 +179,7 @@ public class ChestKeeper extends JavaPlugin {
 
         for (CKUser user : users.values()) {
             user.forceClean();
+            queueUser(user);
         }
         io.shutdown();
 
