@@ -28,7 +28,8 @@ public class ThreadIO implements Runnable {
                     while (isRunning && ioQueue.isEmpty()) {
                         ioQueue.wait();
                     }
-                    toWrite = new HashMap<String, String>(ioQueue);
+                    toWrite = new HashMap<String, String>();
+                    toWrite.putAll(ioQueue);
                     ioQueue.clear();
                 }
                 process(toWrite);
