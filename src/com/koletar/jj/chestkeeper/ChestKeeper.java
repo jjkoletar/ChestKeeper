@@ -179,9 +179,18 @@ public class ChestKeeper extends JavaPlugin {
 
         for (CKUser user : users.values()) {
             user.forceClean();
-            queueUser(user);
         }
         io.shutdown();
+        YamlConfiguration conf = new YamlConfiguration();
+        for (CKUser user : users.values()) {
+            File out = new File(new File(getDataFolder(), "data"), ChestKeeper.getFileName(user.getUsername()));
+            conf.set("user", user);
+            try {
+                conf.save(out);
+            } catch (IOException e) {
+                logger.warning("ChestKeeper couldn't save a player during shutdown!");
+            }
+        }
 
         logger.info("ChestKeeper disabled!");
     }
