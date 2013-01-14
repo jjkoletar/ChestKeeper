@@ -489,9 +489,11 @@ public class CKFacilitator implements CommandExecutor, Listener {
         boolean isOutOfView = inventory.getViewers().size() - 1 == 0;
         trace("Inventory closed: " + inventory.getName() + ", isOurs: " + isOurs + ", isOutOfView: " + isOutOfView);
         if (isOurs && isOutOfView) {
-            if (openChests.get(inventory.getTitle()).save(inventory)) {
+            CKUser user = openChests.get(inventory.getTitle());
+            openChests.remove(user);
+            if (user.save(inventory)) {
                 trace("Save successful, queueing");
-                plugin.queueUser(openChests.get(inventory.getTitle()));
+                plugin.queueUser(user);
             } else {
                 trace("Save failed");
             }
