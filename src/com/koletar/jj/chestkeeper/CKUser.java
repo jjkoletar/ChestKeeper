@@ -1,5 +1,6 @@
 package com.koletar.jj.chestkeeper;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
@@ -136,7 +137,9 @@ public class CKUser implements ConfigurationSerializable {
     }
 
     public boolean setDefaultChest(String name) {
-        if (name == null) return true;
+        if (name == null) {
+            return true;
+        }
         if (chests.containsKey(name.toLowerCase())) {
             defaultChest = name.toLowerCase();
             return true;
@@ -169,48 +172,53 @@ public class CKUser implements ConfigurationSerializable {
             while (!done) {
                 String line = chestYml.readLine();
                 if (line != null) {
-                    if (line.equals("")) {
-                        //Skip
-                    } else if (!line.substring(0, 1).equals(" ")) {
-                        if (currentChest != null) {
-                            CKChest chest = new CKChest(currentChest, isLargeChest);
+                    try {
+                        if (line.equals("")) {
+                            //Skip
+                        } else if (!line.substring(0, 1).equals(" ")) {
+                            if (currentChest != null) {
+                                CKChest chest = new CKChest(currentChest, isLargeChest);
+                                if (currentItem != null) {
+                                    items.add(currentItem);
+                                    currentItem = null;
+                                }
+                                chest.setItems(items.toArray(new ItemStack[items.size()]));
+                                chests.put(currentChest.toLowerCase(), chest);
+                                items.clear();
+                            }
+                            if (line.startsWith("'") && line.endsWith("':")) {
+                                currentChest = line.substring(1, line.length() - 2);
+                            } else {
+                                currentChest = line.substring(0, line.length() - 1);
+                            }
+                        } else if (line.startsWith("  type: ")) {
+                            isLargeChest = line.contains("large");
+                        } else if (line.equals("  eitems: []")) {
+                            //Skip
+                        } else if (line.startsWith("  eitems:")) {
+                            areReadingItems = true;
+                        } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
                             if (currentItem != null) {
                                 items.add(currentItem);
-                                currentItem = null;
                             }
-                            chest.setItems(items.toArray(new ItemStack[items.size()]));
-                            chests.put(currentChest.toLowerCase(), chest);
-                            items.clear();
+                            currentItem = new ItemStack(1);
+                        } else if (areReadingItems && line.startsWith("    count: ")) {
+                            int i = Integer.valueOf(line.substring(11));
+                            currentItem.setAmount(i);
+                        } else if (areReadingItems && line.startsWith("    damage: ")) {
+                            short s = Short.valueOf(line.substring(12));
+                            currentItem.setDurability(s);
+                        } else if (areReadingItems && line.startsWith("    id: ")) {
+                            int id = Integer.valueOf(line.substring(8));
+                            currentItem.setTypeId(id);
+                        } else if (areReadingItems && line.startsWith("      ")) {
+                            String ench = line.substring(6);
+                            String[] bits = ench.split(": ");
+                            currentItem.addUnsafeEnchantment(Enchantment.getById(Integer.valueOf(bits[0])), Integer.valueOf(bits[1]));
                         }
-                        if (line.startsWith("'") && line.endsWith("':")) {
-                            currentChest = line.substring(1, line.length() - 2);
-                        } else {
-                            currentChest = line.substring(0, line.length() - 1);
-                        }
-                    } else if (line.startsWith("  type: ")) {
-                        isLargeChest = line.contains("large");
-                    } else if (line.equals("  eitems: []")) {
-                        //Skip
-                    } else if (line.startsWith("  eitems:")) {
-                        areReadingItems = true;
-                    } else if (areReadingItems && line.equals("  - !!com.aranai.virtualchest.ItemStackSave")) {
-                        if (currentItem != null) {
-                            items.add(currentItem);
-                        }
-                        currentItem = new ItemStack(1);
-                    } else if (areReadingItems && line.startsWith("    count: ")) {
-                        int i = Integer.valueOf(line.substring(11));
-                        currentItem.setAmount(i);
-                    } else if (areReadingItems && line.startsWith("    damage: ")) {
-                        short s = Short.valueOf(line.substring(12));
-                        currentItem.setDurability(s);
-                    } else if (areReadingItems && line.startsWith("    id: ")) {
-                        int id = Integer.valueOf(line.substring(8));
-                        currentItem.setTypeId(id);
-                    } else if (areReadingItems && line.startsWith("      ")) {
-                        String ench = line.substring(6);
-                        String[] bits = ench.split(": ");
-                        currentItem.addUnsafeEnchantment(Enchantment.getById(Integer.valueOf(bits[0])), Integer.valueOf(bits[1]));
+                    } catch (NumberFormatException nfe) {
+                        Bukkit.getLogger().info("[ChestKeeper] Error converting line: " + line);
+                        nfe.printStackTrace();
                     }
                 } else {
                     done = true;
