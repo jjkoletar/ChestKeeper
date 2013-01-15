@@ -638,6 +638,12 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     }
                 }
             }
+        } else if (event.getAction().equals(Action.LEFT_CLICK_AIR)) {
+            if (ChestKeeper.Config.getWandItemId() != 0) {
+                if (event.getItem() != null && event.getItem().getTypeId() == ChestKeeper.Config.getWandItemId() && event.getPlayer().hasPermission("chestkeeper.use.wand")) {
+                    openDefaultChest(event.getPlayer());
+                }
+            }
         }
     }
 

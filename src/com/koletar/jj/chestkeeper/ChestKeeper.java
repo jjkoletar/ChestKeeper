@@ -43,6 +43,7 @@ public class ChestKeeper extends JavaPlugin {
         private static double chestOpenPrice = 0;
         private static double normalChestPrice = 1000;
         private static double largeChestPrice = 2000;
+        private static int wandItemId = 0;
 
         public static int getMaxNumberOfChests() {
             return maxNumberOfChests;
@@ -103,6 +104,23 @@ public class ChestKeeper extends JavaPlugin {
             out.write("# The price to upgrade a large chest is largeChestPrice - normalChestPrice. If the two are equal, upgrades are free.");
             out.newLine();
             out.write("largeChestPrice: 2000");
+            out.newLine();
+        }
+
+        public static int getWandItemId() {
+            return wandItemId;
+        }
+
+        private static void setWandItemId(int wandItemId) {
+            Config.wandItemId = wandItemId;
+        }
+
+        public static void writeWandItemId(BufferedWriter out) throws IOException {
+            out.write("# Item ID of a 'wand' item which, when used while the item is in hand, opens a user's default chest, set to 0 to disable feature.");
+            out.newLine();
+            out.write("# Users will need the 'chestkeeper.use.wand' permission. Check http://www.minecraftwiki.net/wiki/Data_values for item IDs.");
+            out.newLine();
+            out.write("wandItemId: 0");
             out.newLine();
         }
     }
@@ -231,6 +249,7 @@ public class ChestKeeper extends JavaPlugin {
             Config.writeChestOpenPrice(out);
             Config.writeNormalChestPrice(out);
             Config.writeLargeChestPrice(out);
+            Config.writeWandItemId(out);
             out.close();
         }
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
@@ -254,6 +273,11 @@ public class ChestKeeper extends JavaPlugin {
             Config.setLargeChestPrice(config.getDouble("largeChestPrice"));
         } else {
             Config.writeLargeChestPrice(out);
+        }
+        if (config.contains("wandItemId")) {
+            Config.setWandItemId(config.getInt("wandItemId"));
+        } else {
+            Config.writeWandItemId(out);
         }
         out.close();
     }
