@@ -153,7 +153,9 @@ public class CKChest implements ConfigurationSerializable {
         kick();
         save();
         ItemStack[] newContents = new ItemStack[LARGE_CHEST_SIZE];
-        System.arraycopy(contents, 0, newContents, 0, contents.length);
+        for (int i = 0; i < contents.length; i++) {
+            newContents[i] = contents[i].clone();
+        }
         contents = newContents;
         inventory = null;
         return true;
