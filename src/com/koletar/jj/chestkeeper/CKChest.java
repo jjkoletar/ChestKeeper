@@ -136,9 +136,9 @@ public class CKChest implements ConfigurationSerializable {
     }
 
     public void setName(String name) {
-        this.title = name;
         kick();
         save();
+        this.title = name;
         inventory = null;
     }
 

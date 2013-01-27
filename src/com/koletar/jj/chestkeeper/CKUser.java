@@ -152,9 +152,8 @@ public class CKUser implements ConfigurationSerializable {
     }
 
     public void mv(String from, String to) {
-        CKChest chest = chests.get(from.toLowerCase());
+        CKChest chest = chests.remove(from.toLowerCase());
         chest.setName(to);
-        chests.remove(from.toLowerCase());
         chests.put(to.toLowerCase(), chest);
         if (defaultChest.equalsIgnoreCase(from)) {
             defaultChest = to.toLowerCase();
