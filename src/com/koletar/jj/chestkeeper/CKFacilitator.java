@@ -17,6 +17,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
@@ -452,6 +453,10 @@ public class CKFacilitator implements CommandExecutor, Listener {
     }
 
     private void openDefaultChest(Player p) {
+        InventoryType openInventory = p.getOpenInventory().getType();
+        if (!InventoryType.CRAFTING.equals(openInventory) && !InventoryType.PLAYER.equals(openInventory)) {
+            return;
+        }
         openDefaultChest(p, plugin.getUser(p));
     }
 
@@ -600,21 +605,23 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     if (lines.length == 0) {
                         return;
                     }
-                    String line = lines[0];
                     Player p = event.getPlayer();
                     if (lines[0].equals(phrase("keeperSignReader"))) {
+                        event.setCancelled(true);
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
                             return;
                         }
                         openDefaultChest(p);
                     } else if (lines[0].equals(phrase("upgradeSignReader"))) {
+                        event.setCancelled(true);
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
                             return;
                         }
                         upgradeChest(p, null, plugin.getUser(p));
                     } else if (lines[0].equals(phrase("buySignReader"))) {
+                        event.setCancelled(true);
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
                             return;
