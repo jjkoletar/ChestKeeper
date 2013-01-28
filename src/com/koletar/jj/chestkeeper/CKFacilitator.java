@@ -454,7 +454,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
 
     private void openDefaultChest(Player p) {
         InventoryType openInventory = p.getOpenInventory().getType();
-        if (!InventoryType.CRAFTING.equals(openInventory) && !InventoryType.PLAYER.equals(openInventory)) {
+        if (!InventoryType.CRAFTING.equals(openInventory) && !InventoryType.PLAYER.equals(openInventory) && !InventoryType.CREATIVE.equals(openInventory)) {
             return;
         }
         openDefaultChest(p, plugin.getUser(p));
