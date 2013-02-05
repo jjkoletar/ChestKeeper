@@ -149,6 +149,7 @@ public class ChestKeeper extends JavaPlugin {
     public void onEnable() {
         logger = getLogger();
         logger.info("ChestKeeper v" + getDescription().getVersion() + " enabling...");
+        logger.info("=-= ChestKeeper wouldn't be possible without the support of Don't Drop the Soap, MCPrison.com =-=");
         Phrases.getInstance().initialize(Locale.ENGLISH);
         users = new HashMap<String, CKUser>();
         fileUsers = new LinkedList<String>();
