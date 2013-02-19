@@ -232,6 +232,9 @@ public class ChestKeeper extends JavaPlugin {
 
     private void checkUpdates() {
         try {
+            if (!Config.getAutoUpdates()) {
+                return;
+            }
             URL updateFile = new URL("http://dl.dropbox.com/u/16290839/ChestKeeper/update.yml");
             YamlConfiguration updates = YamlConfiguration.loadConfiguration(updateFile.openStream());
             int remoteVer = updates.getInt("version");
