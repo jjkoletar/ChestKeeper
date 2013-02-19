@@ -44,6 +44,7 @@ public class ChestKeeper extends JavaPlugin {
         private static double normalChestPrice = 1000;
         private static double largeChestPrice = 2000;
         private static int wandItemId = 0;
+        private static boolean autoUpdates = true;
 
         public static int getMaxNumberOfChests() {
             return maxNumberOfChests;
@@ -121,6 +122,21 @@ public class ChestKeeper extends JavaPlugin {
             out.write("# Users will need the 'chestkeeper.use.wand' permission. Check http://www.minecraftwiki.net/wiki/Data_values for item IDs.");
             out.newLine();
             out.write("wandItemId: 0");
+            out.newLine();
+        }
+
+        public static boolean getAutoUpdates() {
+            return autoUpdates;
+        }
+
+        private static void setAutoUpdates(boolean autoUpdates) {
+            Config.autoUpdates = autoUpdates;
+        }
+
+        public static void writeAutoUpdates(BufferedWriter out) throws IOException {
+            out.write("# Whether or not to have the plugin check for new version on server boot. You still must update manually. Set to false to disable.");
+            out.newLine();
+            out.write("autoUpdates: true");
             out.newLine();
         }
     }
@@ -251,6 +267,7 @@ public class ChestKeeper extends JavaPlugin {
             Config.writeNormalChestPrice(out);
             Config.writeLargeChestPrice(out);
             Config.writeWandItemId(out);
+            Config.writeAutoUpdates(out);
             out.close();
         }
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
@@ -279,6 +296,11 @@ public class ChestKeeper extends JavaPlugin {
             Config.setWandItemId(config.getInt("wandItemId"));
         } else {
             Config.writeWandItemId(out);
+        }
+        if (config.contains("autoUpdates")) {
+            Config.setAutoUpdates(config.getBoolean("autoUpdates"));
+        } else {
+            Config.writeAutoUpdates(out);
         }
         out.close();
     }
