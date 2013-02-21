@@ -45,6 +45,7 @@ public class ChestKeeper extends JavaPlugin {
         private static double largeChestPrice = 2000;
         private static int wandItemId = 0;
         private static boolean autoUpdates = true;
+        private static List<String> disabledWorlds = new LinkedList<String>();
 
         public static int getMaxNumberOfChests() {
             return maxNumberOfChests;
@@ -137,6 +138,29 @@ public class ChestKeeper extends JavaPlugin {
             out.write("# Whether or not to have the plugin check for new version on server boot. You still must update manually. Set to false to disable.");
             out.newLine();
             out.write("autoUpdates: true");
+            out.newLine();
+        }
+
+        public static List<String> getDisabledWorlds() {
+            return new LinkedList<String>(disabledWorlds);
+        }
+
+        public static boolean isWorldDisabled(String worldName) {
+            return disabledWorlds.contains(worldName);
+        }
+
+        public static void setDisabledWorlds(List<String> disabledWorlds) {
+            Config.disabledWorlds = disabledWorlds;
+        }
+
+        public static void writeDisabledWorlds(BufferedWriter out) throws IOException {
+            out.write("# A list of worlds where ChestKeeper Chests cannot be opened in. All other actions are allowed.");
+            out.newLine();
+            out.write("# World names are case-sensitive. Users with the chestkeeper.override permission are allowed to use Chests in these worlds.");
+            out.newLine();
+            out.write("disabledWorlds: ");
+            out.newLine();
+            out.write("  - myleastfavoriteworld");
             out.newLine();
         }
     }
@@ -271,6 +295,7 @@ public class ChestKeeper extends JavaPlugin {
             Config.writeLargeChestPrice(out);
             Config.writeWandItemId(out);
             Config.writeAutoUpdates(out);
+            Config.writeDisabledWorlds(out);
             out.close();
         }
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
@@ -304,6 +329,11 @@ public class ChestKeeper extends JavaPlugin {
             Config.setAutoUpdates(config.getBoolean("autoUpdates"));
         } else {
             Config.writeAutoUpdates(out);
+        }
+        if (config.contains("disabledWorlds")) {
+            Config.setDisabledWorlds(config.getStringList("disabledWorlds"));
+        } else {
+            Config.writeDisabledWorlds(out);
         }
         out.close();
     }

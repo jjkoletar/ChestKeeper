@@ -64,6 +64,10 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         sender.sendMessage(phrase("noPermission"));
                         return true;
                     }
+                    if (ChestKeeper.Config.isWorldDisabled(((Player) sender).getWorld().getName()) && !sender.hasPermission("chestkeeper.override")) {
+                        sender.sendMessage(phrase("notInThisWorld"));
+                        return true;
+                    }
                     if (args.length == 1) {
                         openDefaultChest((Player) sender);
                         return true;
@@ -641,6 +645,10 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         event.setCancelled(true);
                         if (!p.hasPermission("chestkeeper.use")) {
                             p.sendMessage(phrase("noPermission"));
+                            return;
+                        }
+                        if (ChestKeeper.Config.isWorldDisabled(p.getWorld().getName()) && !p.hasPermission("chestkeeper.override")) {
+                            p.sendMessage(phrase("notInThisWorld"));
                             return;
                         }
                         openDefaultChest(p);
