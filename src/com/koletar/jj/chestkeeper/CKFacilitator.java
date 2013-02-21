@@ -50,7 +50,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("chestkeeper")) {
             if (args.length == 0 || (args.length >= 1 && (args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("?")))) {
-                for (int i = 1; i <= 18; i++) {
+                for (int i = 1; i <= 20; i++) {
                     sender.sendMessage(phrase("help" + i));
                 }
                 return true;
@@ -137,8 +137,8 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     }
                     Player p = (Player) sender;
                     CKUser user = plugin.getUser(p);
-                    if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !sender.hasPermission("chestkeeper.override")) {
-                        p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
+                    if (!canGetOneMoreChest(user) && !sender.hasPermission("chestkeeper.override")) {
+                        p.sendMessage(phrase("youHitTheLimit", user.getChestLimit()));
                         return true;
                     }
                     if (args.length > 3 || args.length < 2) {
@@ -376,6 +376,37 @@ public class CKFacilitator implements CommandExecutor, Listener {
                     sender.sendMessage(phrase("about1"));
                     sender.sendMessage(phrase("about2"));
                     sender.sendMessage(phrase("about3", plugin.getDescription().getVersion()));
+                    return true;
+                } else if (args[0].equalsIgnoreCase("limit") || args[0].equalsIgnoreCase("lim")) {
+                    if (!sender.hasPermission("chestkeeper.limit")) {
+                        sender.sendMessage(phrase("noPermission"));
+                        return true;
+                    }
+                    if (args.length < 2 || args.length > 3) {
+                        sender.sendMessage(phrase("badArgs"));
+                        return true;
+                    }
+                    CKUser user = plugin.matchUser(args[1]);
+                    if (user == null) {
+                        sender.sendMessage(phrase("unknownUser", args[1]));
+                        return true;
+                    }
+                    if (args.length == 2) {
+                        //Clear limit
+                        user.setChestLimit(-1);
+                        sender.sendMessage(phrase("limitCleared", user));
+                    } else {
+                        //Set limit
+                        int limit;
+                        try {
+                            limit = Integer.valueOf(args[2]);
+                        } catch (NumberFormatException nfe) {
+                            sender.sendMessage(phrase("badArgs"));
+                            return true;
+                        }
+                        user.setChestLimit(limit);
+                        sender.sendMessage(phrase("limitSet", user, limit));
+                    }
                     return true;
                 }
             }
@@ -627,8 +658,8 @@ public class CKFacilitator implements CommandExecutor, Listener {
                             return;
                         }
                         CKUser user = plugin.getUser(p);
-                        if (user.getNumberOfChests() + 1 > ChestKeeper.Config.getMaxNumberOfChests() && ChestKeeper.Config.getMaxNumberOfChests() != -1 && !p.hasPermission("chestkeeper.override")) {
-                            p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
+                        if (!canGetOneMoreChest(user) && !p.hasPermission("chestkeeper.override")) {
+                            p.sendMessage(phrase("youHitTheLimit", user.getChestLimit()));
                             return;
                         }
                         if (ChestKeeper.Config.getNormalChestPrice() > 0 && plugin.hasEconomy()) {
@@ -688,5 +719,9 @@ public class CKFacilitator implements CommandExecutor, Listener {
                 }
             });
         }
+    }
+
+    private boolean canGetOneMoreChest(CKUser user) {
+        return user.getChestLimit() == -1 || user.getNumberOfChests() + 1 <= user.getChestLimit();
     }
 }

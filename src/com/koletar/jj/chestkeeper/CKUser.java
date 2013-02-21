@@ -25,6 +25,7 @@ public class CKUser implements ConfigurationSerializable {
     private SortedMap<String, CKChest> chests;
     private HashMap<String, CKChest> inventoryPairings;
     private int magic;
+    private int chestLimit = -1;
 
     public CKUser(String username) {
         this.username = username;
@@ -44,6 +45,8 @@ public class CKUser implements ConfigurationSerializable {
                 username = entry.getValue().toString();
             } else if (entry.getKey().equals("magic")) {
                 magic = Integer.valueOf(entry.getValue().toString());
+            } else if (entry.getKey().equals("chestLimit")) {
+                chestLimit = Integer.valueOf(entry.getValue().toString());
             } else if (entry.getValue() instanceof CKChest) {
                 chests.put(entry.getKey(), (CKChest) entry.getValue());
             }
@@ -55,6 +58,7 @@ public class CKUser implements ConfigurationSerializable {
         me.put("defaultChest", defaultChest);
         me.put("username", username);
         me.put("magic", magic);
+        me.put("chestLimit", chestLimit);
         for (Map.Entry<String, CKChest> entry : chests.entrySet()) {
             me.put(entry.getKey(), entry.getValue());
         }
@@ -158,6 +162,14 @@ public class CKUser implements ConfigurationSerializable {
         if (defaultChest.equalsIgnoreCase(from)) {
             defaultChest = to.toLowerCase();
         }
+    }
+
+    public int getChestLimit() {
+        return chestLimit == -1 ? ChestKeeper.Config.getMaxNumberOfChests() : chestLimit;
+    }
+
+    public void setChestLimit(int chestLimit) {
+        this.chestLimit = chestLimit;
     }
 
     public void fromVC(BufferedReader chestYml, String defaultChest) {
