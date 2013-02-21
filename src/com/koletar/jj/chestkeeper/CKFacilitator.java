@@ -141,7 +141,7 @@ public class CKFacilitator implements CommandExecutor, Listener {
                         p.sendMessage(phrase("youHitTheLimit", ChestKeeper.Config.getMaxNumberOfChests()));
                         return true;
                     }
-                    if (args.length > 3 || args.length < 1) {
+                    if (args.length > 3 || args.length < 2) {
                         p.sendMessage(phrase("badArgs"));
                         return true;
                     }
