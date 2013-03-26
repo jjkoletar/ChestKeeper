@@ -446,9 +446,11 @@ public class ChestKeeper extends JavaPlugin {
      */
     protected void queueUser(CKUser user) {
         trace("queuing user " + user.getUsername());
+        final String username = user.getUsername();
+        serializer.set("user", user);
+        final String serialized = serializer.saveToString();
         synchronized (ioQueue) {
-            serializer.set("user", user);
-            ioQueue.put(user.getUsername(), serializer.saveToString());
+            ioQueue.put(username, serialized);
             ioQueue.notifyAll();
         }
     }
