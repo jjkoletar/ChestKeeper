@@ -6,7 +6,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
+import com.koletar.jj.chestkeeper.org.mcstats.Metrics;
 
 import java.io.BufferedWriter;
 import java.io.File;
